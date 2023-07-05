@@ -23,17 +23,27 @@ const handleComparison = (planet, value, comparison) => {
   if (comparison === 'menor que') return Number(planet) < Number(value);
 };
 
+const applyFilter = (planets, filters) => filters.reduce((data, filter) => data
+  .filter(filter), planets);
+
 function Table({ filter }) {
   const [planets, setPlanets] = useState([]);
   useEffect(() => {
     getStarWarsPlanets().then(setPlanets);
   }, []);
 
-  const { column, comparison, value, name } = filter;
+  const { name, filterArray } = filter;
 
-  const filteredPlanets = planets
-    .filter((planet) => planet.name.toLowerCase().includes(name.toLowerCase()))
-    .filter((planet) => handleComparison(planet[column], value, comparison));
+  const filteredPlanets = applyFilter(planets, [
+    (planet) => planet.name.toLowerCase().includes(name.toLowerCase()),
+    ...filterArray.map(
+      ({ column, value, comparison }) => (planet) => handleComparison(
+        planet[column],
+        value,
+        comparison,
+      ),
+    ),
+  ]);
 
   console.log(filter);
 

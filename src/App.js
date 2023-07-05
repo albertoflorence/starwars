@@ -10,7 +10,7 @@ function App() {
     value: 0,
   });
 
-  const [filter, setFilter] = useState({ name: '' });
+  const [filter, setFilter] = useState({ name: '', filterArray: [] });
 
   const handleInputChange = ({ target }) => {
     const { name, value } = target;
@@ -19,7 +19,8 @@ function App() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    setFilter(inputs);
+    const { name, ...rest } = inputs;
+    setFilter({ name, filterArray: [...filter.filterArray, rest] });
   };
 
   useEffect(() => {
@@ -29,7 +30,7 @@ function App() {
   }, [inputs, filter]);
 
   const { column, comparison, value, name } = inputs;
-  console.log(inputs);
+  const { filterArray } = filter;
 
   return (
     <div>
@@ -75,6 +76,13 @@ function App() {
           Filtrar
         </button>
       </form>
+      {filterArray.map((item) => (
+        <div key={ item.column }>
+          <span>{item.column}</span>
+          <span>{item.comparison}</span>
+          <span>{item.value}</span>
+        </div>
+      ))}
       <Table filter={ filter } />
     </div>
   );
