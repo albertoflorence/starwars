@@ -23,7 +23,7 @@ const handleComparison = (planet, value, comparison) => {
   if (comparison === 'menor que') return Number(planet) < Number(value);
 };
 
-const applyFilter = (planets, filters) => filters.reduce((data, filter) => data
+const applyFilters = (planets, filters) => filters.reduce((data, filter) => data
   .filter(filter), planets);
 
 function Table({ filter }) {
@@ -34,7 +34,7 @@ function Table({ filter }) {
 
   const { name, filterArray } = filter;
 
-  const filteredPlanets = applyFilter(planets, [
+  const filteredPlanets = applyFilters(planets, [
     (planet) => planet.name.toLowerCase().includes(name.toLowerCase()),
     ...filterArray.map(
       ({ column, value, comparison }) => (planet) => handleComparison(
@@ -44,8 +44,6 @@ function Table({ filter }) {
       ),
     ),
   ]);
-
-  console.log(filter);
 
   return (
     <table>
@@ -93,5 +91,12 @@ function Table({ filter }) {
 export default Table;
 
 Table.propTypes = {
-  filter: PropTypes.string.isRequired,
+  filter: PropTypes.shape({
+    name: PropTypes.string,
+    filterArray: PropTypes.arrayOf(PropTypes.shape({
+      column: PropTypes.string,
+      comparison: PropTypes.string,
+      value: PropTypes.string,
+    })),
+  }).isRequired,
 };

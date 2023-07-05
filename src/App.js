@@ -25,7 +25,7 @@ function App() {
 
   useEffect(() => {
     if (inputs.name !== filter.name) {
-      setFilter({ name: inputs.name });
+      setFilter({ name: inputs.name, filterArray: [] });
     }
   }, [inputs, filter]);
 
