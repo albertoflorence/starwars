@@ -32,6 +32,14 @@ function App() {
   const { column, comparison, value, name } = inputs;
   const { filterArray } = filter;
 
+  const columnOptions = [
+    'population',
+    'orbital_period',
+    'diameter',
+    'rotation_period',
+    'surface_water',
+  ].filter((item) => !filterArray.find((el) => el.column === item));
+
   return (
     <div>
       <h1>Star Wars Planets</h1>
@@ -49,11 +57,9 @@ function App() {
           name="column"
           onChange={ handleInputChange }
         >
-          <option value="population">population</option>
-          <option value="orbital_period">orbital_period</option>
-          <option value="diameter">diameter</option>
-          <option value="rotation_period">rotation_period</option>
-          <option value="surface_water">surface_water</option>
+          {columnOptions.map((item) => (
+            <option key={ item } value={ item }>{item}</option>
+          ))}
         </select>
         <select
           data-testid="comparison-filter"
