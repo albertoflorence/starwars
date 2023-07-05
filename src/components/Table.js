@@ -16,14 +16,26 @@ const getFilms = (url) => {
   return films[index];
 };
 
+const handleComparison = (planet, value, comparison) => {
+  if (!planet) return true;
+  if (comparison === 'maior que') return Number(planet) > Number(value);
+  if (comparison === 'igual a') return Number(planet) === Number(value);
+  if (comparison === 'menor que') return Number(planet) < Number(value);
+};
+
 function Table({ filter }) {
   const [planets, setPlanets] = useState([]);
   useEffect(() => {
     getStarWarsPlanets().then(setPlanets);
   }, []);
 
-  const filteredPlanets = planets.filter((planet) => planet
-    .name.toLowerCase().includes(filter.toLowerCase()));
+  const { column, comparison, value, name } = filter;
+
+  const filteredPlanets = planets
+    .filter((planet) => planet.name.toLowerCase().includes(name.toLowerCase()))
+    .filter((planet) => handleComparison(planet[column], value, comparison));
+
+  console.log(filter);
 
   return (
     <table>
