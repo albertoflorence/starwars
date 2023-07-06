@@ -26,7 +26,7 @@ const handleComparison = (planet, value, comparison) => {
 const applyFilters = (planets, filters) => filters.reduce((data, filter) => data
   .filter(filter), planets);
 
-function Table({ filter }) {
+function Table({ filter, sort }) {
   const [planets, setPlanets] = useState([]);
   useEffect(() => {
     getStarWarsPlanets().then(setPlanets);
@@ -44,6 +44,19 @@ function Table({ filter }) {
       ),
     ),
   ]);
+
+  if (sort.column) {
+    filteredPlanets
+      .sort((a, b) => {
+        const negative = -1;
+        if (a[sort.column] === 'unknown') return 1;
+        if (b[sort.column] === 'unknown') return negative;
+        const aValue = Number(a[sort.column]);
+        const bValue = Number(b[sort.column]);
+        return (sort.orderBy === 'ASC'
+          ? aValue - bValue : bValue - aValue);
+      });
+  }
 
   return (
     <table>
@@ -67,7 +80,7 @@ function Table({ filter }) {
       <tbody>
         {filteredPlanets.map((planet) => (
           <tr key={ planet.name }>
-            <td>{planet.name}</td>
+            <td data-testid="planet-name">{planet.name}</td>
             <td>{planet.rotation_period}</td>
             <td>{planet.orbital_period}</td>
             <td>{planet.diameter}</td>
@@ -98,5 +111,9 @@ Table.propTypes = {
       comparison: PropTypes.string,
       value: PropTypes.string,
     })),
+  }).isRequired,
+  sort: PropTypes.shape({
+    column: PropTypes.string,
+    orderBy: PropTypes.string,
   }).isRequired,
 };

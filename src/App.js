@@ -3,14 +3,9 @@ import './App.css';
 import Table from './components/Table';
 
 const getColumnOptions = (array) => [
-  'population',
-  'orbital_period',
-  'diameter',
-  'rotation_period',
-  'surface_water']
-  .filter(
-    (item) => !array.find((el) => el.column === item),
-  );
+  'population', 'orbital_period', 'diameter', 'rotation_period', 'surface_water'].filter(
+  (item) => !array.find((el) => el.column === item),
+);
 
 function App() {
   const [inputs, setInputs] = useState({
@@ -18,8 +13,11 @@ function App() {
     column: 'population',
     comparison: 'maior que',
     value: '0',
+    orderColumn: 'population',
+    orderBy: '',
   });
   const [filter, setFilter] = useState({ name: '', filterArray: [] });
+  const [sort, setSort] = useState({ column: '', orderBy: '' });
 
   useEffect(() => {
     if (inputs.name !== filter.name) {
@@ -32,12 +30,16 @@ function App() {
     setInputs({ ...inputs, [name]: value });
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const handleFilter = () => {
     const { name, ...rest } = inputs;
     const newFilterArray = [...filter.filterArray, rest];
     setFilter({ name, filterArray: newFilterArray });
     setInputs({ ...inputs, column: getColumnOptions(newFilterArray)[0] });
+  };
+
+  const handleOrder = () => {
+    const { orderColumn, orderBy } = inputs;
+    setSort({ column: orderColumn, orderBy });
   };
 
   const handleFilterDelete = (index) => {
@@ -47,13 +49,13 @@ function App() {
     setFilter({ ...filter, filterArray: newFilterArray });
   };
 
-  const { column, comparison, value, name } = inputs;
+  const { column, comparison, value, name, orderBy, orderColumn } = inputs;
   const { filterArray } = filter;
 
   return (
     <div>
       <h1>Star Wars Planets</h1>
-      <form onSubmit={ handleSubmit }>
+      <section>
         <input
           data-testid="name-filter"
           type="text"
@@ -90,10 +92,49 @@ function App() {
           name="value"
           onChange={ handleInputChange }
         />
-        <button data-testid="button-filter" type="submit">
+        <button data-testid="button-filter" onClick={ handleFilter }>
           Filtrar
         </button>
-      </form>
+        <select
+          data-testid="column-sort"
+          value={ orderColumn }
+          name="orderColumn"
+          onChange={ handleInputChange }
+        >
+          <option value="population">population</option>
+          <option value="orbital_period">orbital_period</option>
+          <option value="diameter">diameter</option>
+          <option value="rotation_period">rotation_period</option>
+          <option value="surface_water">surface_water</option>
+        </select>
+        <label htmlFor="asc">ascendente</label>
+        <input
+          data-testid="column-sort-input-asc"
+          type="radio"
+          id="asc"
+          name="orderBy"
+          value="ASC"
+          checked={ orderBy === 'ASC' }
+          onChange={ handleInputChange }
+        />
+        <label htmlFor="desc">descendente</label>
+        <input
+          data-testid="column-sort-input-desc"
+          type="radio"
+          id="desc"
+          name="orderBy"
+          value="DESC"
+          checked={ orderBy === 'DESC' }
+          onChange={ handleInputChange }
+        />
+        <button data-testid="column-sort-button" onClick={ handleOrder }>Ordenar</button>
+        <button
+          data-testid="button-remove-filters"
+          onClick={ () => handleFilterDelete() }
+        >
+          remover filtros
+        </button>
+      </section>
       {filterArray.map((item, index) => (
         <div data-testid="filter" key={ item.column }>
           <span>{item.column}</span>
@@ -104,10 +145,7 @@ function App() {
           </button>
         </div>
       ))}
-      <button data-testid="button-remove-filters" onClick={ () => handleFilterDelete() }>
-        remover filtros
-      </button>
-      <Table filter={ filter } />
+      <Table filter={ filter } sort={ sort } />
     </div>
   );
 }
