@@ -17,7 +17,7 @@ function App() {
     name: '',
     column: 'population',
     comparison: 'maior que',
-    value: 0,
+    value: '0',
   });
   const [filter, setFilter] = useState({ name: '', filterArray: [] });
 

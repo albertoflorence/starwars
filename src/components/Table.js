@@ -96,7 +96,7 @@ Table.propTypes = {
     filterArray: PropTypes.arrayOf(PropTypes.shape({
       column: PropTypes.string,
       comparison: PropTypes.string,
-      value: PropTypes.number,
+      value: PropTypes.string,
     })),
   }).isRequired,
 };
