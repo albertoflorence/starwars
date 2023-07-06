@@ -10,11 +10,12 @@ import PropTypes from 'prop-types';
 
 import { getStarWarsPlanets } from '../services';
 
-const handleComparison = (planet, value, comparison) => {
-  if (!planet) return true;
+export const handleComparison = (planet, value, comparison) => {
   if (comparison === 'maior que') return Number(planet) > Number(value);
   if (comparison === 'igual a') return Number(planet) === Number(value);
   if (comparison === 'menor que') return Number(planet) < Number(value);
+
+  return false;
 };
 
 const applyFilters = (planets, filters) => filters
@@ -70,6 +71,7 @@ export function PlanetsProvider({ children }) {
   if (order.column) {
     filteredPlanets
       .sort((a, b) => {
+        console.log('b[order.column]: ', b[order.column]);
         const negative = -1;
         if (a[order.column] === 'unknown') return 1;
         if (b[order.column] === 'unknown') return negative;
