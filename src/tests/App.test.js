@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { mockFetch } from './mock';
 
 import App from '../App';
@@ -75,13 +75,14 @@ describe('<App />', () => {
     await waitFor(() => screen.getByText('Tatooine'));
     filterByColumn('rotation_period', 'igual a', '24')
     filterByColumn('surface_water', 'menor que', '2')
-    expect(screen.queryByRole('option', { name: 'rotation_period' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('option', { name: 'surface_water' })).not.toBeInTheDocument();
+    const { queryByRole, getByRole } = within(screen.getByTestId('column-filter'));
+    expect(queryByRole('option', { name: 'rotation_period' })).not.toBeInTheDocument();
+    expect(queryByRole('option', { name: 'surface_water' })).not.toBeInTheDocument();
     const deleteButton = screen.getAllByRole('button', { name: 'deletar filtro' })[0]
     expect(screen.queryAllByTestId('filter')).toHaveLength(2)
     userEvent.click(deleteButton)
-    expect(screen.queryByRole('option', { name: 'rotation_period' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'rotation_period' })).toBeInTheDocument();
+    expect(getByRole('option', { name: 'rotation_period' })).toBeInTheDocument();
+    expect(getByRole('option', { name: 'rotation_period' })).toBeInTheDocument();
   })
   it('Deve deletar todos os filtros', async () => {
     render(<App />);
@@ -92,6 +93,20 @@ describe('<App />', () => {
     userEvent.click(deleteButton)
     expect(screen.queryAllByTestId('filter')).toHaveLength(0);
   })
+  it('Deve ordenar os planetas por population', async () => {
+    render(<App />);
+    await waitFor(() => screen.getByText('Tatooine'));
+    const sortColumn = screen.getByTestId('column-sort');
+    const orderByDesc = screen.getByTestId('column-sort-input-desc');
+    const sortButton = screen.getByTestId('column-sort-button');
+    userEvent.selectOptions(sortColumn, 'population');
+    userEvent.click(orderByDesc);
+    userEvent.click(sortButton);
+    const [first, second, third] = screen.getAllByTestId('planet-name')
+    expect(first).toHaveTextContent('Naboo')
+    expect(second).toHaveTextContent('Alderaan')
+    expect(third).toHaveTextContent('Tatooine')
+  });
 });
 
 const filterByColumn = (columnInput, comparisonInput, valueInput) => {
