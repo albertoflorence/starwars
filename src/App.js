@@ -2,6 +2,16 @@ import React, { useEffect, useState } from 'react';
 import './App.css';
 import Table from './components/Table';
 
+const getColumnOptions = (array) => [
+  'population',
+  'orbital_period',
+  'diameter',
+  'rotation_period',
+  'surface_water']
+  .filter(
+    (item) => !array.find((el) => el.column === item),
+  );
+
 function App() {
   const [inputs, setInputs] = useState({
     name: '',
@@ -9,8 +19,13 @@ function App() {
     comparison: 'maior que',
     value: 0,
   });
-
   const [filter, setFilter] = useState({ name: '', filterArray: [] });
+
+  useEffect(() => {
+    if (inputs.name !== filter.name) {
+      setFilter({ name: inputs.name, filterArray: [] });
+    }
+  }, [inputs, filter]);
 
   const handleInputChange = ({ target }) => {
     const { name, value } = target;
@@ -20,25 +35,20 @@ function App() {
   const handleSubmit = (event) => {
     event.preventDefault();
     const { name, ...rest } = inputs;
-    setFilter({ name, filterArray: [...filter.filterArray, rest] });
+    const newFilterArray = [...filter.filterArray, rest];
+    setFilter({ name, filterArray: newFilterArray });
+    setInputs({ ...inputs, column: getColumnOptions(newFilterArray)[0] });
   };
 
-  useEffect(() => {
-    if (inputs.name !== filter.name) {
-      setFilter({ name: inputs.name, filterArray: [] });
-    }
-  }, [inputs, filter]);
+  const handleFilterDelete = (index) => {
+    if (index === undefined) return setFilter({ ...filter, filterArray: [] });
+    const { filterArray } = filter;
+    const newFilterArray = filterArray.filter((_, i) => i !== index);
+    setFilter({ ...filter, filterArray: newFilterArray });
+  };
 
   const { column, comparison, value, name } = inputs;
   const { filterArray } = filter;
-
-  const columnOptions = [
-    'population',
-    'orbital_period',
-    'diameter',
-    'rotation_period',
-    'surface_water',
-  ].filter((item) => !filterArray.find((el) => el.column === item));
 
   return (
     <div>
@@ -53,12 +63,14 @@ function App() {
         />
         <select
           data-testid="column-filter"
-          value={ column }
           name="column"
+          value={ column }
           onChange={ handleInputChange }
         >
-          {columnOptions.map((item) => (
-            <option key={ item } value={ item }>{item}</option>
+          {getColumnOptions(filterArray).map((item) => (
+            <option key={ item } value={ item }>
+              {item}
+            </option>
           ))}
         </select>
         <select
@@ -82,13 +94,19 @@ function App() {
           Filtrar
         </button>
       </form>
-      {filterArray.map((item) => (
-        <div key={ item.column }>
+      {filterArray.map((item, index) => (
+        <div data-testid="filter" key={ item.column }>
           <span>{item.column}</span>
           <span>{item.comparison}</span>
           <span>{item.value}</span>
+          <button aria-label="deletar filtro" onClick={ () => handleFilterDelete(index) }>
+            X
+          </button>
         </div>
       ))}
+      <button data-testid="button-remove-filters" onClick={ () => handleFilterDelete() }>
+        remover filtros
+      </button>
       <Table filter={ filter } />
     </div>
   );
