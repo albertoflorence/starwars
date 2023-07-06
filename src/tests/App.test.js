@@ -1,16 +1,17 @@
 import React from 'react';
-import { render, screen, waitFor, within } from '@testing-library/react';
-import { mockFetch } from './mock';
+import { screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import App from '../App';
-import userEvent from '@testing-library/user-event';
+import { mockFetch } from './mock';
+import { customRender } from './utils';
 
 describe('<App />', () => {
   beforeEach(() => {
     global.fetch = jest.fn(mockFetch);
   });
-  it('Deve renderizar as colunas da tabela corretamente', async () => {
-    render(<App />);
+  it('Deve customRenderizar as colunas da tabela corretamente', async () => {
+    customRender(<App />);
     await waitFor(() => screen.getByText('Tatooine'));
     expect(screen.getByText('Name')).toBeInTheDocument();
     expect(screen.getByText('Rotation Period')).toBeInTheDocument();
@@ -23,7 +24,7 @@ describe('<App />', () => {
     expect(screen.getByText('Population')).toBeInTheDocument();
   })
   it('Deve mostrar os planetas corretamente', async () => {
-    render(<App />);
+    customRender(<App />);
     await waitFor(() => screen.getByText('Tatooine'));
     expect(screen.getByText('23')).toBeInTheDocument();
     expect(screen.getByText('304')).toBeInTheDocument();
@@ -36,7 +37,7 @@ describe('<App />', () => {
     expect(screen.getAllByRole('row')).toHaveLength(4)
   });
   it('Deve filtrar os planetas por nome', async () => {
-    render(<App />);
+    customRender(<App />);
     await waitFor(() => screen.getByText('Tatooine'));
     const inputName = screen.getByTestId('name-filter');
     userEvent.type(inputName, 'oo');
@@ -45,33 +46,33 @@ describe('<App />', () => {
     expect(screen.getAllByRole('row')).toHaveLength(3)
   })
   it('Deve filtrar os planetas por diameter', async () => {
-    render(<App />);
+    customRender(<App />);
     await waitFor(() => screen.getByText('Tatooine'));
     filterByColumn('diameter', 'igual a', '12500')
     expect(screen.getByText('Alderaan')).toBeInTheDocument();
     expect(screen.getAllByRole('row')).toHaveLength(2)
   })
   it('Deve filtrar os planetas por population', async () => {
-    render(<App />);
+    customRender(<App />);
     await waitFor(() => screen.getByText('Tatooine'));
     filterByColumn('population', 'menor que', '200001')
     expect(screen.getByText('Tatooine')).toBeInTheDocument();
     expect(screen.getAllByRole('row')).toHaveLength(2)
   })
   it('Deve filtrar os planetas por population', async () => {
-    render(<App />);
+    customRender(<App />);
     await waitFor(() => screen.getByText('Tatooine'));
     filterByColumn('orbital_period', 'maior que', '363')
     expect(screen.getByText('Alderaan')).toBeInTheDocument();
     expect(screen.getAllByRole('row')).toHaveLength(2)
   })
   it('Deve mostrar o nome dos filmes', async () => {
-    render(<App />);
+    customRender(<App />);
     await waitFor(() => screen.getByText('Tatooine'));
     expect(screen.getAllByText('The Empire Strikes Back')).toHaveLength(2);
   })
   it('Deve deletar um filtro', async () => {
-    render(<App />);
+    customRender(<App />);
     await waitFor(() => screen.getByText('Tatooine'));
     filterByColumn('rotation_period', 'igual a', '24')
     filterByColumn('surface_water', 'menor que', '2')
@@ -85,7 +86,7 @@ describe('<App />', () => {
     expect(getByRole('option', { name: 'rotation_period' })).toBeInTheDocument();
   })
   it('Deve deletar todos os filtros', async () => {
-    render(<App />);
+    customRender(<App />);
     await waitFor(() => screen.getByText('Tatooine'));
     filterByColumn('rotation_period', 'igual a', '24')
     filterByColumn('surface_water', 'menor que', '2')
@@ -94,7 +95,7 @@ describe('<App />', () => {
     expect(screen.queryAllByTestId('filter')).toHaveLength(0);
   })
   it('Deve ordenar os planetas por population', async () => {
-    render(<App />);
+    customRender(<App />);
     await waitFor(() => screen.getByText('Tatooine'));
     const sortColumn = screen.getByTestId('column-sort');
     const orderByDesc = screen.getByTestId('column-sort-input-desc');

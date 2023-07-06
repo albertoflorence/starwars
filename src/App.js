@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
+
 import './App.css';
 import Table from './components/Table';
+import { usePlanets } from './hooks/usePlanets';
 
 const getColumnOptions = (array) => [
   'population', 'orbital_period', 'diameter', 'rotation_period', 'surface_water'].filter(
@@ -8,6 +10,7 @@ const getColumnOptions = (array) => [
 );
 
 function App() {
+  const { filterByName, orderByColumn, addFilter, filters, removeFilter } = usePlanets();
   const [inputs, setInputs] = useState({
     name: '',
     column: 'population',
@@ -16,14 +19,15 @@ function App() {
     orderColumn: 'population',
     orderBy: '',
   });
-  const [filter, setFilter] = useState({ name: '', filterArray: [] });
-  const [sort, setSort] = useState({ column: '', orderBy: '' });
 
   useEffect(() => {
-    if (inputs.name !== filter.name) {
-      setFilter({ name: inputs.name, filterArray: [] });
-    }
-  }, [inputs, filter]);
+    filterByName(inputs.name);
+  }, [inputs, filterByName]);
+
+  useEffect(() => {
+    const [firstOption] = getColumnOptions(filters);
+    setInputs((s) => ({ ...s, column: firstOption }));
+  }, [filters]);
 
   const handleInputChange = ({ target }) => {
     const { name, value } = target;
@@ -31,26 +35,16 @@ function App() {
   };
 
   const handleFilter = () => {
-    const { name, ...rest } = inputs;
-    const newFilterArray = [...filter.filterArray, rest];
-    setFilter({ name, filterArray: newFilterArray });
-    setInputs({ ...inputs, column: getColumnOptions(newFilterArray)[0] });
+    const { column, comparison, value } = inputs;
+    addFilter({ column, comparison, value });
   };
 
   const handleOrder = () => {
     const { orderColumn, orderBy } = inputs;
-    setSort({ column: orderColumn, orderBy });
-  };
-
-  const handleFilterDelete = (index) => {
-    if (index === undefined) return setFilter({ ...filter, filterArray: [] });
-    const { filterArray } = filter;
-    const newFilterArray = filterArray.filter((_, i) => i !== index);
-    setFilter({ ...filter, filterArray: newFilterArray });
+    orderByColumn(orderColumn, orderBy);
   };
 
   const { column, comparison, value, name, orderBy, orderColumn } = inputs;
-  const { filterArray } = filter;
 
   return (
     <div>
@@ -69,7 +63,7 @@ function App() {
           value={ column }
           onChange={ handleInputChange }
         >
-          {getColumnOptions(filterArray).map((item) => (
+          {getColumnOptions(filters).map((item) => (
             <option key={ item } value={ item }>
               {item}
             </option>
@@ -130,22 +124,22 @@ function App() {
         <button data-testid="column-sort-button" onClick={ handleOrder }>Ordenar</button>
         <button
           data-testid="button-remove-filters"
-          onClick={ () => handleFilterDelete() }
+          onClick={ () => removeFilter() }
         >
           remover filtros
         </button>
       </section>
-      {filterArray.map((item, index) => (
+      {filters.map((item) => (
         <div data-testid="filter" key={ item.column }>
           <span>{item.column}</span>
           <span>{item.comparison}</span>
           <span>{item.value}</span>
-          <button aria-label="deletar filtro" onClick={ () => handleFilterDelete(index) }>
+          <button aria-label="deletar filtro" onClick={ () => removeFilter(item.column) }>
             X
           </button>
         </div>
       ))}
-      <Table filter={ filter } sort={ sort } />
+      <Table />
     </div>
   );
 }

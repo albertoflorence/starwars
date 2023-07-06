@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
+import React from 'react';
 
-import { getStarWarsPlanets } from '../services';
+import { usePlanets } from '../hooks/usePlanets';
 
 const getFilms = (url) => {
   const films = [
@@ -16,48 +15,8 @@ const getFilms = (url) => {
   return films[index];
 };
 
-const handleComparison = (planet, value, comparison) => {
-  if (!planet) return true;
-  if (comparison === 'maior que') return Number(planet) > Number(value);
-  if (comparison === 'igual a') return Number(planet) === Number(value);
-  if (comparison === 'menor que') return Number(planet) < Number(value);
-};
-
-const applyFilters = (planets, filters) => filters.reduce((data, filter) => data
-  .filter(filter), planets);
-
-function Table({ filter, sort }) {
-  const [planets, setPlanets] = useState([]);
-  useEffect(() => {
-    getStarWarsPlanets().then(setPlanets);
-  }, []);
-
-  const { name, filterArray } = filter;
-
-  const filteredPlanets = applyFilters(planets, [
-    (planet) => planet.name.toLowerCase().includes(name.toLowerCase()),
-    ...filterArray.map(
-      ({ column, value, comparison }) => (planet) => handleComparison(
-        planet[column],
-        value,
-        comparison,
-      ),
-    ),
-  ]);
-
-  if (sort.column) {
-    filteredPlanets
-      .sort((a, b) => {
-        const negative = -1;
-        if (a[sort.column] === 'unknown') return 1;
-        if (b[sort.column] === 'unknown') return negative;
-        const aValue = Number(a[sort.column]);
-        const bValue = Number(b[sort.column]);
-        return (sort.orderBy === 'ASC'
-          ? aValue - bValue : bValue - aValue);
-      });
-  }
-
+function Table() {
+  const { planets } = usePlanets();
   return (
     <table>
       <thead>
@@ -78,7 +37,7 @@ function Table({ filter, sort }) {
         </tr>
       </thead>
       <tbody>
-        {filteredPlanets.map((planet) => (
+        {planets.map((planet) => (
           <tr key={ planet.name }>
             <td data-testid="planet-name">{planet.name}</td>
             <td>{planet.rotation_period}</td>
@@ -102,18 +61,3 @@ function Table({ filter, sort }) {
 }
 
 export default Table;
-
-Table.propTypes = {
-  filter: PropTypes.shape({
-    name: PropTypes.string,
-    filterArray: PropTypes.arrayOf(PropTypes.shape({
-      column: PropTypes.string,
-      comparison: PropTypes.string,
-      value: PropTypes.string,
-    })),
-  }).isRequired,
-  sort: PropTypes.shape({
-    column: PropTypes.string,
-    orderBy: PropTypes.string,
-  }).isRequired,
-};
